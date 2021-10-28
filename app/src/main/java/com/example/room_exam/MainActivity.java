@@ -2,8 +2,11 @@ package com.example.room_exam;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.room.Room;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -23,19 +26,17 @@ public class MainActivity extends AppCompatActivity {
         mTodoEditText = findViewById(R.id.todo_edit);
         mResultTextView = findViewById(R.id.result_text);
 
-        final AppDatabase db = Room.databaseBuilder(this, AppDatabase.class, "todo-db")
-                .allowMainThreadQueries() //백그라운드에서 돌려야 되는데 일단은 메인스레드에서 하자
-                .build();
+        MainViewModel viewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(MainViewModel.class);
 
         // 관찰하다 UI 갱신
-        db.todoDao().getAll().observe(this, todos -> {
+        viewModel.getAll().observe(this, todos -> {
             mResultTextView.setText(todos.toString());
         });
 
 
         // 버튼 클릭시 DB에 insert
         findViewById(R.id.add_button).setOnClickListener(v -> {
-            db.todoDao().insert(new Todo(mTodoEditText.getText().toString()));
+            viewModel.insert(new Todo(mTodoEditText.getText().toString()));
         });
     }
 }
